@@ -1,6 +1,7 @@
 # ncac
-## NCurses Asana Client
-Building
+ncurses [Asana](https://asana.com) Client
+
+## Building
 ```sh
 bazel build ncac
 ```
