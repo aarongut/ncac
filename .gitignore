@@ -1,4 +1,6 @@
 *.swp
 *.swo
 
-*.o
+bazel-*
+
+tags
