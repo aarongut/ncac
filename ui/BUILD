@@ -1,6 +1,6 @@
 cc_library(
     name="ui",
-    srcs = ["base.c"],
+    srcs = ["base.cc"],
     hdrs = ["base.h"],
     deps = ["@system_include//:curses"],
     visibility = ["//visibility:public"],

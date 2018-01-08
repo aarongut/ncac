@@ -4,12 +4,10 @@
 /**
  * Cleans up before exit. Installed on SIGINT
  */
-void finish();
+static void finish(int sig);
 
 /**
  * Sets up ncurses and internal data structures
  */
-void setup();
-
-
+static void setup();
 #endif // _NCAC_H_

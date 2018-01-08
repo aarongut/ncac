@@ -1,7 +1,7 @@
 cc_binary(
     name = "ncac",
     srcs = [
-        "ncac.c",
+        "ncac.cc",
         "ncac.h",
     ],
     deps = [
