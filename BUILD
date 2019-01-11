@@ -5,6 +5,7 @@ cc_binary(
         "ncac.h",
     ],
     deps = [
+        "//asana",
         "//ui",
         "@system_include//:curses"
     ],

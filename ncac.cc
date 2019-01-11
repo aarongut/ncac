@@ -4,7 +4,10 @@
 #include <stdlib.h>
 #include <term.h>
 
+#include <iostream>
+
 #include "ui/base.h"
+#include "asana/fetch.h"
 
 
 int main(int argc, char **argv) {
@@ -23,7 +26,7 @@ int main(int argc, char **argv) {
       case 'b':
         ui::draw_text("Goodbye, world!", &curs_x, &curs_y);
         break;
-      default:
+      case 'q':
         finish(SIGTERM);
         break;
     }
@@ -33,15 +36,28 @@ int main(int argc, char **argv) {
 
 static void finish(int sig) {
   endwin();
+  asana::deinit();
   exit(0);
 }
 
 static void setup() {
-  // initialize ncurses
-  initscr();
-  cbreak();
+  // initialize the asana client
+  if (!asana::init()) {
+    std::cerr << "Unable to initialize the Asana client\n" << EOF;
+    exit(1);
+  }
 
-  // don't echo input
+  // initialize ncurses
+  if (!initscr()) {
+    std::cerr << "Unable to initialize the curses screen.\n" << EOF;
+    exit(1);
+  }
+
+  // don't buffer or echo input
+  if (cbreak() == ERR) {
+    std::cerr << "Unable to initialize.\n" << EOF;
+    exit(1);
+  }
   noecho();
   nonl();
 
