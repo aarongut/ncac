@@ -16,7 +16,8 @@ bool asana_init(char *pat) {
   curl = curl_easy_init();
   if (!curl) return false;
 
-  snprintf(asana_auth_header_str, AUTH_HEADER_SIZE, "Authorization: Bearer %s", pat);
+  snprintf(asana_auth_header_str, AUTH_HEADER_SIZE, "Authorization: Bearer %s",
+           pat);
   asana_auth_header = curl_slist_append(NULL, asana_auth_header_str);
 
   if (!asana_auth_header) return false;
@@ -30,7 +31,8 @@ void asana_cleanup() {
   curl_global_cleanup();
 }
 
-size_t asana_write_callback(void *contents, size_t size, size_t nmemb, void *resp) {
+size_t asana_write_callback(void *contents, size_t size, size_t nmemb,
+                            void *resp) {
   Response *response = (Response *)resp;
 
   size_t realsize = size * nmemb;
@@ -72,4 +74,3 @@ void asana_free_response(Response *r) {
   free(r->body);
   free(r);
 }
-

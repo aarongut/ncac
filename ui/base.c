@@ -3,7 +3,6 @@
 #include <curses.h>
 #include <string.h>
 
-
 void draw_text(char *text, int *x, int *y) {
   if (!text || strnlen(text, 1) == 0) return;
 

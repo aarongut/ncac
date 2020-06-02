@@ -1,13 +1,12 @@
 #include "ncac.h"
 
 #include <curses.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <term.h>
 
-#include "ui/base.h"
 #include "asana/fetch.h"
-
+#include "ui/base.h"
 
 int main(int argc, char **argv) {
   setup();
@@ -17,7 +16,7 @@ int main(int argc, char **argv) {
 
   char input;
 
-  while(1) {
+  while (1) {
     switch (input = getch()) {
       case 'a':
         draw_text("Hello, world!", &curs_x, &curs_y);
