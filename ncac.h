@@ -10,4 +10,7 @@ static void finish(int sig);
  * Sets up ncurses and internal data structures
  */
 static void setup();
+
+
+void get_me(int *curs_x, int *curs_y);
 #endif // _NCAC_H_

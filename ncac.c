@@ -25,6 +25,9 @@ int main(int argc, char **argv) {
       case 'b':
         draw_text("Goodbye, world!", &curs_x, &curs_y);
         break;
+      case 'j':
+        get_me(&curs_x, &curs_y);
+        break;
       case 'q':
         finish(SIGTERM);
         break;
@@ -40,8 +43,14 @@ static void finish(int sig) {
 }
 
 static void setup() {
+  char *pat = getenv("ASANA_PAT");
+  if (!pat) {
+    fprintf(stderr, "ASANA_PAT is not defined\n");
+    exit(1);
+  }
+
   // initialize the asana client
-  if (!asana_init()) {
+  if (!asana_init(pat)) {
     fprintf(stderr, "Unable to initialize the Asana client\n");
     exit(1);
   }
@@ -64,4 +73,14 @@ static void setup() {
   signal(SIGINT, &finish);
   signal(SIGKILL, &finish);
   signal(SIGTERM, &finish);
+}
+
+void get_me(int *curs_x, int *curs_y) {
+  Response *response = asana_fetch("users/me");
+
+  *curs_x = 0;
+  (*curs_y)++;
+  draw_text(response->body, curs_x, curs_y);
+
+  asana_free_response(response);
 }
