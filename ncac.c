@@ -2,9 +2,8 @@
 
 #include <curses.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <term.h>
-
-#include <iostream>
 
 #include "ui/base.h"
 #include "asana/fetch.h"
@@ -21,10 +20,10 @@ int main(int argc, char **argv) {
   while(1) {
     switch (input = getch()) {
       case 'a':
-        ui::draw_text("Hello, world!", &curs_x, &curs_y);
+        draw_text("Hello, world!", &curs_x, &curs_y);
         break;
       case 'b':
-        ui::draw_text("Goodbye, world!", &curs_x, &curs_y);
+        draw_text("Goodbye, world!", &curs_x, &curs_y);
         break;
       case 'q':
         finish(SIGTERM);
@@ -36,26 +35,26 @@ int main(int argc, char **argv) {
 
 static void finish(int sig) {
   endwin();
-  asana::deinit();
+  asana_cleanup();
   exit(0);
 }
 
 static void setup() {
   // initialize the asana client
-  if (!asana::init()) {
-    std::cerr << "Unable to initialize the Asana client\n" << EOF;
+  if (!asana_init()) {
+    fprintf(stderr, "Unable to initialize the Asana client\n");
     exit(1);
   }
 
   // initialize ncurses
   if (!initscr()) {
-    std::cerr << "Unable to initialize the curses screen.\n" << EOF;
+    fprintf(stderr, "Unable to initialize the curses screen.\n");
     exit(1);
   }
 
   // don't buffer or echo input
   if (cbreak() == ERR) {
-    std::cerr << "Unable to initialize.\n" << EOF;
+    fprintf(stderr, "Unable to initialize.\n");
     exit(1);
   }
   noecho();

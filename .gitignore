@@ -1,6 +1,7 @@
+ncac
+
+*.o
 *.swp
 *.swo
-
-bazel-*
 
 tags
