@@ -5,10 +5,11 @@
 #include <stdlib.h>
 #include <term.h>
 
+#include "asana/asana.h"
 #include "asana/fetch.h"
 #include "ui/base.h"
 
-int main(int argc, char **argv) {
+int main(/*int argc, char **argv*/) {
   setup();
 
   int curs_x = 0;
@@ -35,7 +36,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-static void finish(int sig) {
+static void finish(/*int sig*/) {
   endwin();
   asana_cleanup();
   exit(0);
@@ -75,11 +76,21 @@ static void setup() {
 }
 
 void get_me(int *curs_x, int *curs_y) {
-  Response *response = asana_fetch("users/me");
+  User me;
+  user_info(&me);
+
+  if (me.workspaces == NULL || me.workspaces_len == 0) {
+    fprintf(stderr, "Unable to get workspaces.\n");
+    return;
+  }
+
+  char gid[64];
+  gid[0] = '\0';
+
+  user_task_list_gid(me.workspaces[0].gid, gid);
+  fprintf(stderr, "Got a task list? %s\n", gid);
 
   *curs_x = 0;
   (*curs_y)++;
-  draw_text(response->body, curs_x, curs_y);
-
-  asana_free_response(response);
+  draw_text(gid, curs_x, curs_y);
 }

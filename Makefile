@@ -1,4 +1,4 @@
-CFLAGS=--std=c18 -O2 -Wall -Wextra -pedantic
+CFLAGS=--std=c18 -Wall -Wextra -pedantic
 LDLIBS=-lncurses -lcurl
 
 .phony: clean
