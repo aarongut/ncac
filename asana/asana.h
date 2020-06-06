@@ -54,9 +54,13 @@ typedef int asana_err;
 #define ASANA_ERR_PARSE 2
 #define ASANA_ERR_UNKNOWN_TYPE 3
 
+asana_err asana_parse(char *json, void *resource);
+void **asana_parse_array(char *json, size_t item_size, size_t *items);
+
 /**
  * Parsing methods to take a cJSON object and populate the Asana resource struct
  */
+void asana_extract(cJSON *data, void *resource);
 void asana_extract_resource(cJSON *json, Resource *resource);
 void asana_extract_user(cJSON *json, User *user);
 void asana_extract_workspace(cJSON *json, Workspace *workspace);

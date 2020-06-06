@@ -18,32 +18,63 @@ asana_err asana_parse(char *json, void *resource) {
   if (parsed != NULL) {
     cJSON *data = cJSON_GetObjectItemCaseSensitive(parsed, "data");
     if (cJSON_IsObject(data)) {
-    cJSON *resource_type = cJSON_GetObjectItemCaseSensitive(data, "resource_type");
-
-    if (cJSON_IsString(resource_type)) {
-      char *typ = resource_type->valuestring;
-
-      fprintf(stderr, "Parsing a %s\n", typ);
+      asana_extract(data, resource);
       ret = ASANA_ERR_OK;
-
-      if (strcmp(typ, "user") == 0) {
-        asana_extract_user(data, resource);
-      } else if (strcmp(typ, "workspace") == 0) {
-        asana_extract_resource(data, resource);
-      } else if (strcmp(typ, "task") == 0) {
-        asana_extract_task(data, resource);
-      } else if (strcmp(typ, "project") == 0 || strcmp(typ, "user_task_list") == 0) {
-        asana_extract_project(data, resource);
-      } else {
-        fprintf(stderr, "Unknown resource type: %s\n", typ);
-        ret = ASANA_ERR_UNKNOWN_TYPE;
-      }
-    }
     }
   }
 
   cJSON_Delete(parsed);
   return ret;
+}
+
+void asana_extract(cJSON *data, void *resource) {
+  cJSON *resource_type = cJSON_GetObjectItemCaseSensitive(data, "resource_type");
+
+  if (cJSON_IsString(resource_type)) {
+    char *typ = resource_type->valuestring;
+
+    fprintf(stderr, "Parsing a %s\n", typ);
+
+    if (strcmp(typ, "user") == 0) {
+      asana_extract_user(data, resource);
+    } else if (strcmp(typ, "workspace") == 0) {
+      asana_extract_resource(data, resource);
+    } else if (strcmp(typ, "task") == 0) {
+      asana_extract_task(data, resource);
+    } else if (strcmp(typ, "project") == 0 || strcmp(typ, "user_task_list") == 0) {
+      asana_extract_project(data, resource);
+    } else {
+      fprintf(stderr, "Unknown resource type: %s\n", typ);
+    }
+  }
+}
+
+
+void **asana_parse_array(char *json, size_t item_size, size_t *items) {
+  if (json == NULL) {
+    return NULL;
+  }
+
+  void *ret = NULL;
+  cJSON *parsed = cJSON_Parse(json);
+
+  if (parsed != NULL) {
+    cJSON *data = cJSON_GetObjectItemCaseSensitive(parsed, "data");
+    if (cJSON_IsArray(data)) {
+      *items = cJSON_GetArraySize(data);
+      ret = calloc(item_size, *items);
+
+      cJSON *item = NULL;
+      size_t i=0;
+      cJSON_ArrayForEach(item, data) {
+        asana_extract(item, (char *)ret+(i*item_size));
+        i++;
+      }
+    }
+  }
+
+  cJSON_Delete(parsed);
+  return (void **)ret;
 }
 
 void asana_extract_user(cJSON *json, User *user) {
@@ -110,6 +141,7 @@ void asana_extract_resource(cJSON *json, Resource *resource) {
   if (cJSON_IsString(gid)) {
     resource->gid = malloc(sizeof(char)*strlen(gid->valuestring));
     strcpy(resource->gid, gid->valuestring);
+    fprintf(stderr, "Extracted resource ID %s\n", resource->gid);
   } else {
     resource->gid = NULL;
   }
@@ -173,7 +205,7 @@ asana_err user_task_list_gid(char *workspace_gid, char *gid) {
 asana_err user_task_list(char *task_list_gid, Project *task_list) {
   asana_err ret = ASANA_ERR_FETCH;
   char path[ASANA_URL_MAX_LENGTH];
-  snprintf(path, ASANA_URL_MAX_LENGTH, "user_task_lists/%s/tasks?limit=100&completed_since=now");
+  snprintf(path, ASANA_URL_MAX_LENGTH, "user_task_lists/%s/tasks?limit=100&completed_since=now", task_list_gid);
 
   Response *task_list_resp = asana_fetch(path);
 
@@ -182,8 +214,8 @@ asana_err user_task_list(char *task_list_gid, Project *task_list) {
   }
 
   if (task_list_resp->status == 200) {
-    ret = asana_parse(task_list_resp->body, task_list);
-    // TODO: need to parse top-level arrays
+    task_list->tasks = (Task *)asana_parse_array(task_list_resp->body, sizeof(Task), &(task_list->tasks_len));
+    ret = task_list->tasks == NULL ? ASANA_ERR_PARSE : ASANA_ERR_OK;
   } else {
     fprintf(stderr, "Error fetching user_Task_list: %d\n", task_list_resp->status);
   }

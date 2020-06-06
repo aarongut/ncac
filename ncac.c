@@ -28,6 +28,9 @@ int main(/*int argc, char **argv*/) {
       case 'j':
         get_me(&curs_x, &curs_y);
         break;
+      case 'm':
+        get_my_tasks(&curs_x, &curs_y);
+        break;
       case 'q':
         finish(SIGTERM);
         break;
@@ -93,4 +96,41 @@ void get_me(int *curs_x, int *curs_y) {
   *curs_x = 0;
   (*curs_y)++;
   draw_text(gid, curs_x, curs_y);
+}
+
+void get_my_tasks(int *curs_x, int *curs_y) {
+  User me;
+  user_info(&me);
+
+  if (me.workspaces == NULL || me.workspaces_len == 0) {
+    fprintf(stderr, "Unable to get workspaces.\n");
+    return;
+  }
+
+  char gid[64];
+  gid[0] = '\0';
+
+  if (user_task_list_gid(me.workspaces[me.workspaces_len-1].gid, gid) != ASANA_ERR_OK) {
+    fprintf(stderr, "Unable to get task list ID. %s\n", gid);
+    return;
+  }
+
+  Project my_tasks;
+  if (user_task_list(gid, &my_tasks) != ASANA_ERR_OK) {
+    fprintf(stderr, "Unable to get task list.\n");
+    return;
+  }
+
+  *curs_x = 0;
+  *curs_y = 0;
+
+  draw_text("My Tasks", curs_x, curs_y);
+  *curs_x = 0;
+  (*curs_y)+=2;
+
+  for (size_t i=0; i<my_tasks.tasks_len;i++) {
+    draw_text(my_tasks.tasks[i].name, curs_x, curs_y);
+    *curs_x = 0;
+    (*curs_y)++;
+  }
 }

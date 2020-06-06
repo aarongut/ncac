@@ -13,4 +13,5 @@ static void setup();
 
 
 void get_me(int *curs_x, int *curs_y);
+void get_my_tasks(int *curs_x, int *curs_y);
 #endif // _NCAC_H_
