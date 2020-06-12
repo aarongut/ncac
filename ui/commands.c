@@ -6,13 +6,15 @@
 #include "../asana/asana.h"
 #include "base.h"
 
-bool ui_quit(ui_state *state) { return true; }
+bool ui_quit() { return true; }
 
 bool ui_help(ui_state *state) {
+  erase();
   state->curs_x = 0;
   state->curs_y = 0;
 
   draw_text("Commands:", state);
+
   state->curs_x = 0;
   state->curs_y += 2;
 
@@ -21,7 +23,6 @@ bool ui_help(ui_state *state) {
     draw_text(ui_commands[i].command, state);
     draw_text("\t", state);
     draw_text(ui_commands[i].help_text, state);
-    clrtoeol();
 
     state->curs_x = 0;
     state->curs_y++;
@@ -34,7 +35,8 @@ bool ui_mytasks(ui_state *state) {
   state->curs_x = 0;
   state->curs_y = 0;
   draw_text("Fetching user...", state);
-  clrtoeol();
+  clrtobot();
+  refresh();
 
   /*
   User me;
@@ -49,7 +51,8 @@ bool ui_mytasks(ui_state *state) {
   state->curs_x = 0;
   state->curs_y = 0;
   draw_text("Fetching user task list ID...", state);
-  clrtoeol();
+  clrtobot();
+  refresh();
 
   char gid[64];
   gid[0] = '\0';
@@ -63,7 +66,8 @@ bool ui_mytasks(ui_state *state) {
   state->curs_x = 0;
   state->curs_y = 0;
   draw_text("Fetching user task list", state);
-  clrtoeol();
+  clrtobot();
+  refresh();
 
   Project my_tasks;
   if (user_task_list(gid, &my_tasks) != ASANA_ERR_OK) {
@@ -82,6 +86,8 @@ bool ui_mytasks(ui_state *state) {
     draw_text(my_tasks.tasks[i].name, state);
     clrtoeol();
   }
+
+  clrtobot();
 
   return false;
 }
