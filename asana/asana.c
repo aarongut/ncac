@@ -217,7 +217,8 @@ asana_err user_task_list(char *task_list_gid, Project *task_list) {
     task_list->tasks = (Task *)asana_parse_array(task_list_resp->body, sizeof(Task), &(task_list->tasks_len));
     ret = task_list->tasks == NULL ? ASANA_ERR_PARSE : ASANA_ERR_OK;
   } else {
-    fprintf(stderr, "Error fetching user_Task_list: %d\n", task_list_resp->status);
+    fprintf(stderr, "Error fetching user_task_list: %d\n",
+            task_list_resp->status);
   }
 
   asana_free_response(task_list_resp);
