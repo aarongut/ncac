@@ -27,7 +27,7 @@ void draw_status_line(ui_state *state) {
 }
 
 void draw_text(const char *text, ui_state *state) {
-  if (!text || strnlen(text, 1) == 0) return;
+  if (!text || text[0] == '\0') return;
 
   mvaddch(state->curs_y, state->curs_x, *text);
   ++text;

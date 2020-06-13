@@ -1,4 +1,4 @@
-CFLAGS=--std=c18 -O2 -Wall -Wextra -pedantic
+CFLAGS=--std=c11 -O2 -Wall -Wextra -pedantic
 LDLIBS=-lncurses -lcurl
 
 .phony: clean
@@ -10,7 +10,7 @@ objects := $(patsubst %.c,%.o,$(srcs))
 ncac: $(objects)
 
 tags: $(srcs) $(hdrs)
-	ctags -w -t $^
+	ctags -w $^
 
 clean:
 	rm -f **/*.o ncac

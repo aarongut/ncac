@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <term.h>
 
 #include "asana/asana.h"
@@ -80,7 +81,8 @@ int main(/*int argc, char **argv*/) {
   return 0;
 }
 
-static void finish(/*int sig*/) {
+static void finish(int sig) {
+  (void)sig;
   endwin();
   asana_cleanup();
   exit(0);

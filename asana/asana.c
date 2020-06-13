@@ -108,7 +108,7 @@ void asana_extract_task(cJSON *json, Task *task) {
 
   cJSON *notes = cJSON_GetObjectItemCaseSensitive(json, "notes");
   if (cJSON_IsString(notes)) {
-    task->notes = malloc(sizeof(char)*strlen(notes->valuestring));
+    task->notes = malloc(sizeof(char)*(strlen(notes->valuestring)+1));
     strcpy(task->notes, notes->valuestring);
   } else {
     task->notes = NULL;
@@ -139,7 +139,7 @@ void asana_extract_project(cJSON *json, Project *project) {
 void asana_extract_resource(cJSON *json, Resource *resource) {
   cJSON *gid = cJSON_GetObjectItemCaseSensitive(json, "gid");
   if (cJSON_IsString(gid)) {
-    resource->gid = malloc(sizeof(char)*strlen(gid->valuestring));
+    resource->gid = malloc(sizeof(char)*(strlen(gid->valuestring)+1));
     strcpy(resource->gid, gid->valuestring);
     fprintf(stderr, "Extracted resource ID %s\n", resource->gid);
   } else {
@@ -148,7 +148,7 @@ void asana_extract_resource(cJSON *json, Resource *resource) {
 
   cJSON *name = cJSON_GetObjectItemCaseSensitive(json, "name");
   if (cJSON_IsString(name)) {
-    resource->name = malloc(sizeof(char)*strlen(name->valuestring));
+    resource->name = malloc(sizeof(char)*(strlen(name->valuestring)+1));
     strcpy(resource->name, name->valuestring);
   } else {
     resource->name = NULL;
@@ -193,6 +193,7 @@ asana_err user_task_list_gid(char *workspace_gid, char *gid) {
       strcpy(gid, task_list.gid);
       ret = ASANA_ERR_OK;
     }
+    asana_free_resource((Resource *)&task_list);
   } else {
     fprintf(stderr, "Error fetching user_task_list: %d\n", task_list_resp->status);
   }
@@ -301,4 +302,5 @@ size_t asana_resource_size(Resource *resource) {
 
   fprintf(stderr, "asana_resource_size: Unknown resource type %d\n",
           resource->type);
+  return 0;
 }
