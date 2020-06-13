@@ -72,4 +72,8 @@ asana_err user_info(User *user);
 asana_err user_task_list_gid(char *workspace_gid, char *gid);
 asana_err user_task_list(char *task_list_gid, Project *task_list);
 
+void asana_free_resource_array(Resource *resource, size_t len);
+void asana_free_resource(Resource *resource);
+size_t asana_resource_size(Resource *resource);
+
 #endif // ASANA_ASANA_H_

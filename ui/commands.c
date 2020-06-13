@@ -69,7 +69,7 @@ bool ui_mytasks(ui_state *state) {
   clrtobot();
   refresh();
 
-  Project my_tasks;
+  Project my_tasks = {PROJECT, NULL, NULL, 0, NULL};
   if (user_task_list(gid, &my_tasks) != ASANA_ERR_OK) {
     fprintf(stderr, "Unable to get task list.\n");
     return true;
@@ -86,6 +86,8 @@ bool ui_mytasks(ui_state *state) {
     draw_text(my_tasks.tasks[i].name, state);
     clrtoeol();
   }
+
+  asana_free_resource((Resource *)&my_tasks);
 
   clrtobot();
 

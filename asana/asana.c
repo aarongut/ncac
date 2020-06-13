@@ -225,3 +225,80 @@ asana_err user_task_list(char *task_list_gid, Project *task_list) {
 
   return ret;
 }
+
+void asana_free_resource_array(Resource *resource, size_t len) {
+  if (resource == NULL)
+    return;
+
+  if (len > 0) {
+    size_t size = asana_resource_size(resource);
+    for (size_t i = 0; i < len; i++) {
+      Resource *item = (Resource *)(((char *)resource) + i * size);
+      asana_free_resource(item);
+    }
+  }
+
+  free(resource);
+}
+
+void asana_free_resource(Resource *resource) {
+  if (resource == NULL)
+    return;
+
+  User *user;
+  Task *task;
+  Project *project;
+
+  switch (resource->type) {
+  case WORKSPACE:
+    if (resource->gid != NULL)
+      free(resource->gid);
+    if (resource->name != NULL)
+      free(resource->name);
+    return;
+  case USER:
+    user = (User *)resource;
+    if (user->gid != NULL)
+      free(user->gid);
+    if (user->name != NULL)
+      free(user->name);
+    asana_free_resource_array((Resource *)user->workspaces,
+                              user->workspaces_len);
+    return;
+  case TASK:
+    task = (Task *)resource;
+    if (task->gid != NULL)
+      free(task->gid);
+    if (task->name != NULL)
+      free(task->name);
+    if (task->notes != NULL)
+      free(task->notes);
+    return;
+  case PROJECT:
+    project = (Project *)resource;
+    if (project->gid != NULL)
+      free(project->gid);
+    if (project->name != NULL)
+      free(project->name);
+    asana_free_resource_array((Resource *)project->tasks, project->tasks_len);
+    return;
+  }
+  fprintf(stderr, "asana_free_resource: Unknown resource type %d\n",
+          resource->type);
+}
+
+size_t asana_resource_size(Resource *resource) {
+  switch (resource->type) {
+  case WORKSPACE:
+    return sizeof(Workspace);
+  case USER:
+    return sizeof(User);
+  case TASK:
+    return sizeof(Task);
+  case PROJECT:
+    return sizeof(Project);
+  }
+
+  fprintf(stderr, "asana_resource_size: Unknown resource type %d\n",
+          resource->type);
+}

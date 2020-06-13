@@ -3,12 +3,13 @@ LDLIBS=-lncurses -lcurl
 
 .phony: clean
 
+hdrs := $(wildcard **/*.h)
 srcs := $(wildcard **/*.c)
 objects := $(patsubst %.c,%.o,$(srcs))
 
 ncac: $(objects)
 
-tags: $(srcs)
+tags: $(srcs) $(hdrs)
 	ctags -w -t $^
 
 clean:
