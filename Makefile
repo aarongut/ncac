@@ -1,3 +1,5 @@
+MAKEFLAGS := -j --output-sync=target
+
 CFLAGS=--std=c11 -O2 -Wall -Wextra -pedantic
 LDLIBS=-lncurses -lcurl
 
