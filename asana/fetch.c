@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../global.h"
+
 CURL *curl;
 
 char asana_auth_header_str[AUTH_HEADER_SIZE];
@@ -50,7 +52,9 @@ Response *asana_fetch(char *path) {
   char url[ASANA_URL_MAX_LENGTH];
   snprintf(url, ASANA_URL_MAX_LENGTH, "https://app.asana.com/api/1.0/%s", path);
 
-  fprintf(stderr, "fetching %s\n", url);
+  if (debug)
+    fprintf(stderr, "fetching %s\n", url);
+
   curl_easy_setopt(curl, CURLOPT_URL, url);
 
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, asana_auth_header);
@@ -64,7 +68,8 @@ Response *asana_fetch(char *path) {
   CURLcode result;
   result = curl_easy_perform(curl);
   if (result == CURLE_OK) {
-    fprintf(stderr, "API Response:\n\n%s\n", response->body);
+    if (debug)
+      fprintf(stderr, "API Response:\n\n%s\n", response->body);
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &(response->status));
   } else {
     response->status = 500;

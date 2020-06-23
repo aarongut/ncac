@@ -5,8 +5,8 @@ LDLIBS=-lncurses -lcurl
 
 .phony: clean
 
-hdrs := $(wildcard **/*.h)
-srcs := $(wildcard **/*.c)
+hdrs := $(wildcard **/*.h) global.h
+srcs := $(wildcard **/*.c) global.c
 objects := $(patsubst %.c,%.o,$(srcs))
 
 ncac: $(objects)

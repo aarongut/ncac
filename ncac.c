@@ -1,15 +1,17 @@
 #include "ncac.h"
 
 #include <curses.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <signal.h>
 #include <term.h>
+#include <unistd.h>
 
 #include "asana/asana.h"
 #include "asana/fetch.h"
+#include "global.h"
 #include "ui/base.h"
 #include "ui/commands.h"
 #include "ui/model.h"
@@ -37,7 +39,8 @@ bool handle_command(ui_state *state) {
   return false;
 }
 
-int main(/*int argc, char **argv*/) {
+int main(int argc, char **argv) {
+
   setup();
 
   int input;
@@ -46,6 +49,20 @@ int main(/*int argc, char **argv*/) {
   state.mode = 0;
   state.buffer_size = 0;
   state.input_buffer[0] = '\0';
+
+  char flag;
+  while ((flag = getopt(argc, argv, "d")) != -1) {
+    switch (flag) {
+    case 'd':
+      debug = true;
+      break;
+    case '?':
+    case 'h':
+    default:
+      draw_text("Type \":help\" for help", &state);
+      break;
+    }
+  }
 
   while (true) {
     draw_status_line(&state);

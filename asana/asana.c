@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "../cJSON/cJSON.h"
+#include "../global.h"
 #include "fetch.h"
 
 asana_err asana_parse(char *json, void *resource) {
@@ -33,7 +34,8 @@ void asana_extract(cJSON *data, void *resource) {
   if (cJSON_IsString(resource_type)) {
     char *typ = resource_type->valuestring;
 
-    fprintf(stderr, "Parsing a %s\n", typ);
+    if (debug)
+      fprintf(stderr, "Parsing a %s\n", typ);
 
     if (strcmp(typ, "user") == 0) {
       asana_extract_user(data, resource);
@@ -44,7 +46,8 @@ void asana_extract(cJSON *data, void *resource) {
     } else if (strcmp(typ, "project") == 0 || strcmp(typ, "user_task_list") == 0) {
       asana_extract_project(data, resource);
     } else {
-      fprintf(stderr, "Unknown resource type: %s\n", typ);
+      if (debug)
+        fprintf(stderr, "Unknown resource type: %s\n", typ);
     }
   }
 }
@@ -81,18 +84,21 @@ void asana_extract_user(cJSON *json, User *user) {
   user->type = USER;
   asana_extract_resource(json, (Resource *)user);
 
-  fprintf(stderr, "Parsing one user. Name: %s\n", user->name);
+  if (debug)
+    fprintf(stderr, "Parsing one user. Name: %s\n", user->name);
 
   cJSON *workspaces = cJSON_GetObjectItemCaseSensitive(json, "workspaces");
   if (cJSON_IsArray(workspaces)) {
-    fprintf(stderr, "We got workspaces\n");
+    if (debug)
+      fprintf(stderr, "We got workspaces\n");
     user->workspaces_len = cJSON_GetArraySize(workspaces);
     user->workspaces = calloc(sizeof(Workspace), user->workspaces_len);
 
     cJSON *workspace = NULL;
     size_t i = 0;
     cJSON_ArrayForEach(workspace, workspaces) {
-      fprintf(stderr, "Extracting workspace\n");
+      if (debug)
+        fprintf(stderr, "Extracting workspace\n");
       asana_extract_resource(workspace, (Resource *)&(user->workspaces[i]));
       i++;
     }
@@ -141,7 +147,8 @@ void asana_extract_resource(cJSON *json, Resource *resource) {
   if (cJSON_IsString(gid)) {
     resource->gid = malloc(sizeof(char)*(strlen(gid->valuestring)+1));
     strcpy(resource->gid, gid->valuestring);
-    fprintf(stderr, "Extracted resource ID %s\n", resource->gid);
+    if (debug)
+      fprintf(stderr, "Extracted resource ID %s\n", resource->gid);
   } else {
     resource->gid = NULL;
   }
@@ -167,7 +174,8 @@ asana_err user_info(User *user) {
   if (user_resp->status == 200) {
     ret = asana_parse(user_resp->body, user);
   } else {
-    fprintf(stderr, "Error fetching user: %d", user_resp->status);
+    if (debug)
+      fprintf(stderr, "Error fetching user: %d", user_resp->status);
   }
 
   asana_free_response(user_resp);
@@ -195,7 +203,9 @@ asana_err user_task_list_gid(char *workspace_gid, char *gid) {
     }
     asana_free_resource((Resource *)&task_list);
   } else {
-    fprintf(stderr, "Error fetching user_task_list: %d\n", task_list_resp->status);
+    if (debug)
+      fprintf(stderr, "Error fetching user_task_list: %d\n",
+              task_list_resp->status);
   }
 
   asana_free_response(task_list_resp);
@@ -218,8 +228,9 @@ asana_err user_task_list(char *task_list_gid, Project *task_list) {
     task_list->tasks = (Task *)asana_parse_array(task_list_resp->body, sizeof(Task), &(task_list->tasks_len));
     ret = task_list->tasks == NULL ? ASANA_ERR_PARSE : ASANA_ERR_OK;
   } else {
-    fprintf(stderr, "Error fetching user_task_list: %d\n",
-            task_list_resp->status);
+    if (debug)
+      fprintf(stderr, "Error fetching user_task_list: %d\n",
+              task_list_resp->status);
   }
 
   asana_free_response(task_list_resp);
@@ -284,8 +295,9 @@ void asana_free_resource(Resource *resource) {
     asana_free_resource_array((Resource *)project->tasks, project->tasks_len);
     return;
   }
-  fprintf(stderr, "asana_free_resource: Unknown resource type %d\n",
-          resource->type);
+  if (debug)
+    fprintf(stderr, "asana_free_resource: Unknown resource type %d\n",
+            resource->type);
 }
 
 size_t asana_resource_size(Resource *resource) {
@@ -300,7 +312,8 @@ size_t asana_resource_size(Resource *resource) {
     return sizeof(Project);
   }
 
-  fprintf(stderr, "asana_resource_size: Unknown resource type %d\n",
-          resource->type);
+  if (debug)
+    fprintf(stderr, "asana_resource_size: Unknown resource type %d\n",
+            resource->type);
   return 0;
 }
